@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101114" />
+    <meta name="description" content="把每一次异议，变成一场登场。" />
+    <link rel="manifest" href="./assets/manifest.json" />
+    <link rel="icon" href="./assets/img/badge.png" />
+    <link rel="stylesheet" href="./assets/static/APlayer.min.css" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <title>随身异议 · OBJECTION!</title>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="topbar chrome">
+      <a class="brand" href="#top" aria-label="随身异议首页">
+        <span class="brand-mark">異</span>
+        <span><b>PORTABLE</b><small>OBJECTION SYSTEM</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="live-dot"></span><span id="sensor-label">MOTION STANDBY</span>
+        <button class="icon-button" id="hide-ui" type="button" title="隐藏控制界面">⌗</button>
+      </div>
+    </header>
+
+    <main id="top" class="layout">
+      <section class="stage-column" aria-label="异议演示区">
+        <div class="eyebrow"><span>01 / THE MOMENT</span><span id="clock-label">COURTROOM READY</span></div>
+        <div class="stage-frame" id="stage-frame">
+          <div class="stage-grid" aria-hidden="true"></div>
+          <div class="stage-cross cross-a" aria-hidden="true"></div>
+          <div class="stage-cross cross-b" aria-hidden="true"></div>
+          <div class="stage-copy">
+            <span class="stage-overline">MAKE YOUR</span>
+            <span class="stage-title">OBJECTION<span>!</span></span>
+            <span class="stage-subtitle">随时随地，提出异议。</span>
+          </div>
+          <div class="impact-ring" aria-hidden="true"></div>
+          <img id="phrase-art" class="phrase-art" src="./assets/img/igiari.png" alt="異議あり！" draggable="false" />
+          <div class="stage-footer"><span id="selected-character">成步堂龙一</span><span id="selected-voice">異議あり!</span></div>
+          <button id="trigger" class="trigger-button" type="button" aria-label="播放异议效果">
+            <span class="trigger-top">TAP TO</span><span class="trigger-main">反对</span><span class="trigger-bottom">MAKE IT COUNT&nbsp; ↗</span>
+          </button>
+          <div class="sensor-readout" aria-live="polite">
+            <span class="readout-label">ACCELERATION <i>m/s²</i></span>
+            <span id="motion-values">X&nbsp; 0.00&nbsp;&nbsp; Y&nbsp; 0.00&nbsp;&nbsp; Z&nbsp; 0.00</span>
+          </div>
+          <div class="max-readout">PEAK <b id="motion-peak">0.00</b></div>
+        </div>
+        <div class="stage-caption"><span><b>TIP</b> 双击舞台隐藏界面</span><span>DESIGNED FOR THE MOMENT</span></div>
+      </section>
+
+      <aside class="control-column chrome" aria-label="异议设置">
+        <div class="panel-heading"><div><span class="eyebrow">02 / YOUR VOICE</span><h1>准备登场</h1></div><span class="version">VIBE EDITION&nbsp; 01</span></div>
+
+        <label class="field-label" for="character">角色 <span>CHARACTER</span></label>
+        <div class="select-wrap"><select id="character" name="character"></select><span class="select-arrow">⌄</span></div>
+
+        <label class="field-label" for="voice">台词 <span>VOICE LINE</span></label>
+        <div class="select-wrap"><select id="voice" name="voice"></select><span class="select-arrow">⌄</span></div>
+
+        <div class="threshold-heading"><label class="field-label" for="threshold">动作灵敏度 <span>SENSITIVITY</span></label><output id="threshold-value" for="threshold">5.0</output></div>
+        <input id="threshold" class="range" type="range" min="0.2" max="30" value="5" step="0.2" />
+        <div class="range-ends"><span>轻微动作</span><span>用力挥动</span></div>
+
+        <div class="button-row">
+          <button id="sensor-toggle" class="button button-primary" type="button"><span class="button-icon">⌁</span><span><b>启用动作触发</b><small>ENABLE MOTION</small></span><span class="button-arrow">↗</span></button>
+          <button id="reset-peak" class="button button-quiet" type="button" title="重置动作峰值">↺</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="option-row">
+          <div><b>自动播放背景音乐</b><small>PLAYLIST · NETEASE</small></div>
+          <label class="switch"><input id="auto-music" type="checkbox" /><span></span></label>
+        </div>
+        <div class="option-row option-row-last">
+          <div><b>桌面鼠标触发</b><small>快捷键 CTRL + SHIFT + Z</small></div>
+          <label class="switch"><input id="mouse-mode" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="panel-bottom"><span id="audio-status">语音首次播放时会缓存</span><button id="clear-cache" type="button">清除语音缓存</button></div>
+      </aside>
+    </main>
+
+    <footer class="footer chrome"><span>OBJECTION, ANYTIME.</span><span>移至安静模式，倾听你的直觉。</span><span>01 — 2026</span></footer>
+
+    <meting-js server="netease" type="playlist" id="9487616885" fixed="true" loop="one" order="list" preload="false" list-folded="true" list-max-height="350px"></meting-js>
+    <audio id="voice-audio" preload="none"></audio>
+    <script src="./assets/static/APlayer.min.js"></script>
+    <script src="./assets/static/Meting.min.js"></script>
+    <script src="./assets/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "随身异议 · OBJECTION!",
+  "short_name": "随身异议",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101114",
+  "theme_color": "#101114",
+  "description": "把每一次异议，变成一场登场。",
+  "icons": [
+    { "src": "./img/badge.png", "sizes": "220x220", "type": "image/png" }
+  ]
+}
