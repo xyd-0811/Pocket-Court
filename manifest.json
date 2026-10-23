@@ -1,0 +1,17 @@
+{
+  "name": "随身异议 · 法庭开庭",
+  "short_name": "随身异议",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ece7dd",
+  "theme_color": "#263e61",
+  "description": "随时随地，提出异议。",
+  "icons": [
+    {
+      "src": "./img/badge.png",
+      "sizes": "220x220",
+      "type": "image/png"
+    }
+  ]
+}
