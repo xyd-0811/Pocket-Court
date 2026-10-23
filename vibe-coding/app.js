@@ -35,9 +35,12 @@
   };
   function avatarMarkup(id, name) {
     const portrait = portraits[id];
+    const source = portrait ? asset(portrait.thumbnail) : '';
+    const ready = portraitCache.get(source)?.ready;
+    const pending = ready ? '' : `data-avatar-src="${source}" hidden`;
     const thumbnail = !portrait ? '' : portrait.avatarPosition
-      ? `<span class="avatar-sprite" data-avatar-src="${asset(portrait.thumbnail)}" style="background-position:${portrait.avatarPosition[0]}% ${portrait.avatarPosition[1]}%" aria-hidden="true" hidden></span>`
-      : `<img data-avatar-src="${asset(portrait.thumbnail)}" alt="" hidden decoding="async" fetchpriority="low">`;
+      ? `<span class="avatar-sprite" ${pending} style="background-position:${portrait.avatarPosition[0]}% ${portrait.avatarPosition[1]}%;${ready ? `background-image:url('${source}')` : ''}" aria-hidden="true"></span>`
+      : `<img ${pending} ${ready ? `src="${source}"` : ''} alt="" decoding="async" fetchpriority="low">`;
     return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait?.preview ? `<img src="${portrait.preview}" alt="" decoding="async">` : ''}${thumbnail}`;
   }
   function showPortrait(preview = false) {
