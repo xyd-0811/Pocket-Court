@@ -26,33 +26,121 @@
   const characterInfo = () => characters.find(c => c[0] === character);
   const say = text => { $('status').textContent = text; };
   const asset = file => window.ObjectionAssets?.[file] || new URL(file, mediaRoot).href;
+  const portraitCache = new Map(), warmedPortraitProfiles = new Set();
+  let portraitSource = '', portraitRequest = 0, portraitLoading = false, avatarWarmup, avatarsRunning = false;
+  const portraitProfile = () => mobile() && !document.body.classList.contains('focus-mode') ? 'mobile' : 'src';
+  const portraitUrl = (id, profile = portraitProfile()) => {
+    const portrait = portraits[id];
+    return portrait ? asset(portrait[profile] || portrait.src) : '';
+  };
   function avatarMarkup(id, name) {
     const portrait = portraits[id];
-    return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait ? `<img src="${asset(portrait.thumbnail)}" alt="" loading="lazy" decoding="async">` : ''}`;
+    return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait?.preview ? `<img src="${portrait.preview}" alt="" decoding="async">` : ''}${portrait ? `<img data-avatar-src="${asset(portrait.thumbnail)}" alt="" hidden decoding="async" fetchpriority="low">` : ''}`;
   }
-  function showPortrait() {
+  function showPortrait(preview = false) {
     $('portrait').hidden = false;
+    $('portrait').classList.toggle('portrait-preview', preview);
     $('placeholder').hidden = true;
-    $('court').setAttribute('aria-busy', 'false');
+    $('court').setAttribute('aria-busy', String(preview));
   }
   function hidePortrait() {
     $('portrait').hidden = true;
     $('placeholder').hidden = false;
     $('court').setAttribute('aria-busy', 'false');
   }
+  function loadPortrait(source, priority = 'high') {
+    const cached = portraitCache.get(source);
+    if (cached) {
+      if (priority === 'high') cached.image.fetchPriority = 'high';
+      return cached.promise;
+    }
+    const image = new Image();
+    image.decoding = 'async'; image.fetchPriority = priority;
+    const entry = { image, ready: false };
+    entry.promise = new Promise((resolve, reject) => {
+      image.onload = async () => {
+        try { await image.decode?.(); entry.ready = true; resolve(image); }
+        catch (error) { portraitCache.delete(source); reject(error); }
+      };
+      image.onerror = () => { portraitCache.delete(source); reject(Error('Portrait unavailable')); };
+      image.src = source;
+    });
+    portraitCache.set(source, entry);
+    return entry.promise;
+  }
+  function visibleAvatarImages() {
+    const dialogOpen = !$('character-dialog').hidden;
+    return [...document.querySelectorAll('[data-avatar-src]')].filter(image => {
+      const parent = image.closest('.avatar'), rect = parent.getBoundingClientRect();
+      return Boolean(image.closest('#character-dialog')) === dialogOpen && parent.offsetParent !== null && rect.bottom > 0 && rect.top < innerHeight;
+    });
+  }
+  function warmAvatars() {
+    clearTimeout(avatarWarmup);
+    if (avatarsRunning || document.hidden) return;
+    avatarWarmup = setTimeout(async () => {
+      if (portraitLoading) { warmAvatars(); return; }
+      avatarsRunning = true;
+      const images = visibleAvatarImages();
+      for (const image of images) {
+        if (portraitLoading || document.hidden) break;
+        if (!image.isConnected) continue;
+        const source = image.dataset.avatarSrc;
+        try {
+          await loadPortrait(source, 'low');
+          if (image.isConnected) { image.src = source; image.hidden = false; delete image.dataset.avatarSrc; }
+        } catch { image.remove(); /* Embedded preview and the surname remain available. */ }
+      }
+      avatarsRunning = false;
+      if (visibleAvatarImages().length) warmAvatars();
+    }, 450);
+  }
+  function warmPortraits() {
+    const connection = navigator.connection;
+    const profile = portraitProfile();
+    if (window.ObjectionAssets || connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '') || document.hidden || warmedPortraitProfiles.has(profile)) return;
+    warmedPortraitProfiles.add(profile);
+    const run = async () => {
+      const ids = [...new Set([character, 'cbt', 'yuj', 'wang', ...characters.map(c => c[0])])];
+      for (const id of ids) {
+        if (document.hidden || navigator.connection?.saveData || profile !== portraitProfile()) { warmedPortraitProfiles.delete(profile); return; }
+        // Keep one background request at a time; foreground selection gets priority.
+        while (portraitLoading && !document.hidden) await new Promise(resolve => setTimeout(resolve, 150));
+        if (document.hidden) { warmedPortraitProfiles.delete(profile); return; }
+        const source = portraitUrl(id, profile);
+        if (source && !portraitCache.has(source)) await loadPortrait(source, 'low').catch(() => {});
+        await new Promise(resolve => setTimeout(resolve, 150));
+      }
+    };
+    setTimeout(() => {
+      if ('requestIdleCallback' in window) requestIdleCallback(() => void run(), { timeout: 2000 });
+      else void run();
+    }, 1200);
+  }
   function renderPortrait(name) {
     const portrait = portraits[character];
     const image = $('portrait');
     image.alt = `${name} · 法庭风格角色立绘`;
-    const source = portrait ? asset(portrait.src) : '';
+    const source = portraitUrl(character);
+    if (source === portraitSource) return;
+    portraitSource = source;
+    const request = ++portraitRequest;
+    portraitLoading = Boolean(source);
     if (!source) { image.removeAttribute('src'); hidePortrait(); return; }
-    if (image.getAttribute('src') !== source) {
-      image.hidden = true;
-      $('placeholder').hidden = false;
-      $('court').setAttribute('aria-busy', 'true');
-      image.src = source;
+    if (portraitCache.get(source)?.ready) {
+      image.src = source; portraitLoading = false; showPortrait(); warmAvatars(); warmPortraits(); return;
     }
-    if (image.complete) image.naturalWidth ? showPortrait() : hidePortrait();
+    if (portrait.preview) { image.src = portrait.preview; showPortrait(true); }
+    else { image.removeAttribute('src'); hidePortrait(); $('court').setAttribute('aria-busy', 'true'); }
+    void loadPortrait(source).then(() => {
+      if (request !== portraitRequest) return;
+      image.src = source; portraitLoading = false; showPortrait(); warmAvatars(); warmPortraits();
+    }).catch(() => {
+      if (request !== portraitRequest) return;
+      portraitLoading = false; portraitSource = '';
+      $('court').setAttribute('aria-busy', 'false');
+      if (!portrait.preview) hidePortrait();
+    });
   }
 
   function saveSettings() {
@@ -82,6 +170,7 @@
     $('quick').querySelectorAll('[data-person]').forEach(button => button.onclick = () => chooseCharacter(button.dataset.person));
     $('all-characters').onclick = openDialog;
     renderVoices();
+    warmAvatars();
   }
 
   function renderVoices() {
@@ -128,6 +217,7 @@
     }).join('');
     if (!matches) $('character-results').innerHTML = '<p class="no-results">没有匹配角色，试试输入姓名中的一个字。</p>';
     $('character-results').querySelectorAll('button').forEach(button => button.onclick = () => chooseCharacter(button.dataset.person));
+    warmAvatars();
   }
   function openDialog() {
     previousFocus = document.activeElement;
@@ -232,7 +322,7 @@
   }
   function updateThreshold() { threshold = Number($('sensitivity').value); $('threshold-value').textContent = threshold.toFixed(1); $('threshold-summary').textContent = '阈值 ' + threshold.toFixed(1); }
   function resetPeak() { peak = 0; $('peak').textContent = '峰值 0.00'; }
-  function setFocus(on) { document.body.classList.toggle('focus-mode', on); (on ? $('restore') : $('focus')).focus({ preventScroll: true }); }
+  function setFocus(on) { document.body.classList.toggle('focus-mode', on); renderPortrait(characterInfo()[1]); (on ? $('restore') : $('focus')).focus({ preventScroll: true }); }
 
   function formatTime(value) { return Number.isFinite(value) ? `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, '0')}` : '--:--'; }
   function musicButton() { $('music-play').textContent = musicAudio.paused ? '▷ 播放音乐' : 'Ⅱ 暂停音乐'; }
@@ -268,14 +358,16 @@
     $('music-status').textContent = '歌单已清空，设备里的音乐文件不会被删除。';
   }
 
-  $('portrait').onload = showPortrait;
   $('portrait').onerror = hidePortrait;
+  matchMedia('(max-width:740px)').addEventListener('change', () => renderPortrait(characterInfo()[1]));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !portraitLoading) warmPortraits(); });
   // A failed thumbnail leaves the readable surname monogram underneath.
   document.addEventListener('error', event => {
     if (event.target instanceof HTMLImageElement && event.target.closest('.avatar')) event.target.remove();
   }, true);
   $('choose-character').onclick = openDialog; $('close-dialog').onclick = closeDialog;
   $('character-search').oninput = renderCharacters;
+  $('character-results').addEventListener('scroll', warmAvatars, { passive: true });
   $('character-dialog').onclick = event => { if (event.target === $('character-dialog')) closeDialog(); };
   $('play').onclick = () => void trigger(); $('arm').onclick = toggleMotion;
   $('simulate').onclick = () => void trigger('模拟挥动'); $('reset-peak').onclick = resetPeak;

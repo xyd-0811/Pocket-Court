@@ -21,3 +21,5 @@ html{color-scheme:light}body{min-height:100dvh}body.dialog-open{overflow:hidden}
 /* Character portraits and compact face previews. */
 .avatar{position:relative;overflow:hidden;background:#e5d8c2}.avatar-letter{position:absolute;inset:0;display:grid;place-items:center}.avatar img{position:absolute;display:block;width:180%;height:270%;left:-40%;top:-5%;object-fit:cover;object-position:center top}
 @media(min-width:741px){.portrait{height:104%;bottom:-22px;right:-5%}}
+.portrait-preview{filter:blur(1.5px)}
+.avatar img[hidden]{display:none}
