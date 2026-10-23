@@ -286,8 +286,8 @@ window.ObjectionCatalog = {
       "thumbnail": "vibe-coding/assets/portraits/dhurke-thumb.webp"
     },
     "yuj": {
-      "src": "vibe-coding/assets/portraits/yuj.webp",
-      "thumbnail": "vibe-coding/assets/portraits/yuj-thumb.webp"
+      "src": "vibe-coding/assets/portraits/yuj-v2.webp",
+      "thumbnail": "vibe-coding/assets/portraits/yuj-v2-thumb.webp"
     },
     "hao": {
       "src": "vibe-coding/assets/portraits/hao.webp",
