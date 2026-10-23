@@ -35,7 +35,10 @@
   };
   function avatarMarkup(id, name) {
     const portrait = portraits[id];
-    return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait?.preview ? `<img src="${portrait.preview}" alt="" decoding="async">` : ''}${portrait ? `<img data-avatar-src="${asset(portrait.thumbnail)}" alt="" hidden decoding="async" fetchpriority="low">` : ''}`;
+    const thumbnail = !portrait ? '' : portrait.avatarPosition
+      ? `<span class="avatar-sprite" data-avatar-src="${asset(portrait.thumbnail)}" style="background-position:${portrait.avatarPosition[0]}% ${portrait.avatarPosition[1]}%" aria-hidden="true" hidden></span>`
+      : `<img data-avatar-src="${asset(portrait.thumbnail)}" alt="" hidden decoding="async" fetchpriority="low">`;
+    return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait?.preview ? `<img src="${portrait.preview}" alt="" decoding="async">` : ''}${thumbnail}`;
   }
   function showPortrait(preview = false) {
     $('portrait').hidden = false;
@@ -88,7 +91,11 @@
         const source = image.dataset.avatarSrc;
         try {
           await loadPortrait(source, 'low');
-          if (image.isConnected) { image.src = source; image.hidden = false; delete image.dataset.avatarSrc; }
+          if (image.isConnected) {
+            if (image instanceof HTMLImageElement) image.src = source;
+            else image.style.backgroundImage = `url("${source}")`;
+            image.hidden = false; delete image.dataset.avatarSrc;
+          }
         } catch { image.remove(); /* Embedded preview and the surname remain available. */ }
       }
       avatarsRunning = false;

@@ -23,3 +23,5 @@ html{color-scheme:light}body{min-height:100dvh}body.dialog-open{overflow:hidden}
 @media(min-width:741px){.portrait{height:104%;bottom:-22px;right:-5%}}
 .portrait-preview{filter:blur(1.5px)}
 .avatar img[hidden]{display:none}
+.avatar-sprite{position:absolute;inset:0;background-size:700% 200%;background-repeat:no-repeat;background-color:#e5d8c2}.avatar-sprite[hidden]{display:none}
+.character-choice .avatar-sprite{left:-3px;right:-3px}
