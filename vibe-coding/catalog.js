@@ -263,5 +263,63 @@ window.ObjectionCatalog = {
       "还不跪下!",
       "中文"
     ]
+  },
+  "portraits": {
+    "cbt": {
+      "src": "vibe-coding/assets/attorney.png",
+      "thumbnail": "vibe-coding/assets/portraits/cbt-thumb.webp"
+    },
+    "qian": {
+      "src": "vibe-coding/assets/portraits/qian.webp",
+      "thumbnail": "vibe-coding/assets/portraits/qian-thumb.webp"
+    },
+    "wang": {
+      "src": "vibe-coding/assets/portraits/wang.webp",
+      "thumbnail": "vibe-coding/assets/portraits/wang-thumb.webp"
+    },
+    "xin": {
+      "src": "vibe-coding/assets/portraits/xin.webp",
+      "thumbnail": "vibe-coding/assets/portraits/xin-thumb.webp"
+    },
+    "dhurke": {
+      "src": "vibe-coding/assets/portraits/dhurke.webp",
+      "thumbnail": "vibe-coding/assets/portraits/dhurke-thumb.webp"
+    },
+    "yuj": {
+      "src": "vibe-coding/assets/portraits/yuj.webp",
+      "thumbnail": "vibe-coding/assets/portraits/yuj-thumb.webp"
+    },
+    "hao": {
+      "src": "vibe-coding/assets/portraits/hao.webp",
+      "thumbnail": "vibe-coding/assets/portraits/hao-thumb.webp"
+    },
+    "ming": {
+      "src": "vibe-coding/assets/portraits/ming.webp",
+      "thumbnail": "vibe-coding/assets/portraits/ming-thumb.webp"
+    },
+    "godo": {
+      "src": "vibe-coding/assets/portraits/godo.webp",
+      "thumbnail": "vibe-coding/assets/portraits/godo-thumb.webp"
+    },
+    "yanei": {
+      "src": "vibe-coding/assets/portraits/yanei.webp",
+      "thumbnail": "vibe-coding/assets/portraits/yanei-thumb.webp"
+    },
+    "xiang": {
+      "src": "vibe-coding/assets/portraits/xiang.webp",
+      "thumbnail": "vibe-coding/assets/portraits/xiang-thumb.webp"
+    },
+    "xun": {
+      "src": "vibe-coding/assets/portraits/xun.webp",
+      "thumbnail": "vibe-coding/assets/portraits/xun-thumb.webp"
+    },
+    "nayuta": {
+      "src": "vibe-coding/assets/portraits/nayuta.webp",
+      "thumbnail": "vibe-coding/assets/portraits/nayuta-thumb.webp"
+    },
+    "garan": {
+      "src": "vibe-coding/assets/portraits/garan.webp",
+      "thumbnail": "vibe-coding/assets/portraits/garan-thumb.webp"
+    }
   }
 };

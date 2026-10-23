@@ -17,3 +17,7 @@ html{color-scheme:light}body{min-height:100dvh}body.dialog-open{overflow:hidden}
 .music-controls{grid-template-columns:1fr 1fr 1fr}.file-pick:focus-within{outline:3px solid #c08636;outline-offset:3px}
 @media(max-width:740px){.outline{min-height:44px}.shell{padding-bottom:calc(126px + env(safe-area-inset-bottom))}.focus-mode .shell{padding-bottom:24px}.restore{top:max(12px,env(safe-area-inset-top))}.source-note{font-size:10px}}
 @media(max-width:350px){.character-grid{grid-template-columns:1fr}.music-controls{gap:5px}.music-controls button{font-size:11px}}
+
+/* Character portraits and compact face previews. */
+.avatar{position:relative;overflow:hidden;background:#e5d8c2}.avatar-letter{position:absolute;inset:0;display:grid;place-items:center}.avatar img{position:absolute;display:block;width:180%;height:270%;left:-40%;top:-5%;object-fit:cover;object-position:center top}
+@media(min-width:741px){.portrait{height:104%;bottom:-22px;right:-5%}}

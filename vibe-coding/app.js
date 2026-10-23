@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const { characterVoices, characters, voices } = window.ObjectionCatalog;
+  const { characterVoices, characters, voices, portraits = {} } = window.ObjectionCatalog;
   const mediaRoot = new URL('../', document.currentScript.src || location.href);
   const $ = id => document.getElementById(id);
   const storageKey = 'portable-objection-vibe-settings';
@@ -26,6 +26,34 @@
   const characterInfo = () => characters.find(c => c[0] === character);
   const say = text => { $('status').textContent = text; };
   const asset = file => window.ObjectionAssets?.[file] || new URL(file, mediaRoot).href;
+  function avatarMarkup(id, name) {
+    const portrait = portraits[id];
+    return `<span class="avatar-letter">${name.slice(0, 1)}</span>${portrait ? `<img src="${asset(portrait.thumbnail)}" alt="" loading="lazy" decoding="async">` : ''}`;
+  }
+  function showPortrait() {
+    $('portrait').hidden = false;
+    $('placeholder').hidden = true;
+    $('court').setAttribute('aria-busy', 'false');
+  }
+  function hidePortrait() {
+    $('portrait').hidden = true;
+    $('placeholder').hidden = false;
+    $('court').setAttribute('aria-busy', 'false');
+  }
+  function renderPortrait(name) {
+    const portrait = portraits[character];
+    const image = $('portrait');
+    image.alt = `${name} · 法庭风格角色立绘`;
+    const source = portrait ? asset(portrait.src) : '';
+    if (!source) { image.removeAttribute('src'); hidePortrait(); return; }
+    if (image.getAttribute('src') !== source) {
+      image.hidden = true;
+      $('placeholder').hidden = false;
+      $('court').setAttribute('aria-busy', 'true');
+      image.src = source;
+    }
+    if (image.complete) image.naturalWidth ? showPortrait() : hidePortrait();
+  }
 
   function saveSettings() {
     const value = { character, voice, language, threshold, haptic: $('haptic').checked, mouseMode: mouse, autoMusic: $('auto-music').checked, musicLoop: $('music-loop').checked, musicVolume: Number($('music-volume').value) };
@@ -39,17 +67,16 @@
     const roleLabel = role === 'ATTORNEY' ? '律师' : '检察官';
     $('current-name').textContent = name;
     $('current-description').textContent = `${roleLabel} · ${allowed.length} 段语音 · 点击查看全部 14 位`;
-    $('current-avatar').textContent = name.slice(0, 1);
+    $('current-avatar').innerHTML = avatarMarkup(character, name);
     $('speaker').textContent = name;
     $('dialogue-line').textContent = voices[voice][0];
     $('dialogue-meta').textContent = `${roleLabel} / ${locale(voices[voice][1])} / ${allowed.length} 段可选语音`;
     $('dock-character').textContent = name;
     $('dock-voice').textContent = voices[voice][0] + ' · ' + locale(voices[voice][1]);
     $('role-tag').textContent = role === 'ATTORNEY' ? 'DEFENSE / 辩护方' : 'PROSECUTION / 检察方';
-    $('portrait').hidden = character !== 'cbt';
-    $('placeholder').hidden = character === 'cbt';
     $('placeholder-name').textContent = name;
     $('monogram').textContent = name.slice(0, 1);
+    renderPortrait(name);
     $('voice-count').textContent = `${allowed.length} 段语音`;
     $('quick').innerHTML = ['cbt', 'yuj', 'wang'].map(id => `<button class="${id === character ? 'active' : ''}" data-person="${id}" aria-pressed="${id === character}">${characters.find(c => c[0] === id)[1]}</button>`).join('') + '<button id="all-characters">全部 14 位 ›</button>';
     $('quick').querySelectorAll('[data-person]').forEach(button => button.onclick = () => chooseCharacter(button.dataset.person));
@@ -97,7 +124,7 @@
     $('character-results').innerHTML = [['ATTORNEY', '律师 / DEFENSE'], ['PROSECUTOR', '检察官 / PROSECUTION']].map(([role, label]) => {
       const list = characters.filter(c => c[2] === role && c[1].toLowerCase().includes(query));
       matches += list.length;
-      return list.length ? `<h3>${label} · ${list.length}</h3><div class="character-grid">${list.map(c => `<button class="character-choice ${c[0] === character ? 'active' : ''}" data-person="${c[0]}" aria-pressed="${c[0] === character}"><span class="avatar">${c[1].slice(0, 1)}</span><span><strong>${c[1]}</strong><small>${characterVoices[c[0]].length} 段语音 ${c[0] === character ? '· 已选' : ''}</small></span></button>`).join('')}</div>` : '';
+      return list.length ? `<h3>${label} · ${list.length}</h3><div class="character-grid">${list.map(c => `<button class="character-choice ${c[0] === character ? 'active' : ''}" data-person="${c[0]}" aria-pressed="${c[0] === character}"><span class="avatar">${avatarMarkup(c[0], c[1])}</span><span><strong>${c[1]}</strong><small>${characterVoices[c[0]].length} 段语音 ${c[0] === character ? '· 已选' : ''}</small></span></button>`).join('')}</div>` : '';
     }).join('');
     if (!matches) $('character-results').innerHTML = '<p class="no-results">没有匹配角色，试试输入姓名中的一个字。</p>';
     $('character-results').querySelectorAll('button').forEach(button => button.onclick = () => chooseCharacter(button.dataset.person));
@@ -241,6 +268,12 @@
     $('music-status').textContent = '歌单已清空，设备里的音乐文件不会被删除。';
   }
 
+  $('portrait').onload = showPortrait;
+  $('portrait').onerror = hidePortrait;
+  // A failed thumbnail leaves the readable surname monogram underneath.
+  document.addEventListener('error', event => {
+    if (event.target instanceof HTMLImageElement && event.target.closest('.avatar')) event.target.remove();
+  }, true);
   $('choose-character').onclick = openDialog; $('close-dialog').onclick = closeDialog;
   $('character-search').oninput = renderCharacters;
   $('character-dialog').onclick = event => { if (event.target === $('character-dialog')) closeDialog(); };
